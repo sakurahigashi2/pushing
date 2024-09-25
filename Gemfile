@@ -10,7 +10,7 @@ gem 'lowdown', require: false
 
 # FCM
 gem 'andpush', require: false
-gem 'fcm', require: false
+gem 'fcm', '~> 2.0.0', require: false
 
 # Debugging
 gem 'pry'

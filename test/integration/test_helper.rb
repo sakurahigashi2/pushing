@@ -8,7 +8,9 @@ WebMock.allow_net_connect!
 
 Pushing::Base.logger = Logger.new(STDOUT)
 Pushing.configure do |config|
-  config.fcm.server_key = ENV.fetch('FCM_TEST_SERVER_KEY')
+  config.fcm.google_application_credentials = ENV.fetch('FCM_TEST_GOOGLE_APPLICATION_CREDENTIALS')
+  config.fcm.firebase_project_id            = ENV.fetch('FCM_TEST_FIREBASE_PROJECT_ID')
+
 
   config.apn.environment          = :development
   config.apn.certificate_path     = File.join(File.expand_path("./"), ENV.fetch('APN_TEST_CERTIFICATE_PATH'))

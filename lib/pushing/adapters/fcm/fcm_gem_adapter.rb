@@ -1,5 +1,6 @@
 # frozen-string-literal: true
 
+require 'stringio'
 require 'json'
 require 'fcm'
 require 'active_support/core_ext/hash/slice'
@@ -9,25 +10,27 @@ module Pushing
     class FcmGemAdapter
       SUCCESS_CODES = (200..299).freeze
 
-      attr_reader :server_key
+      attr_reader :fcm
 
       def initialize(fcm_settings)
-        @server_key = fcm_settings.server_key
+        @fcm = FCM.new(
+          fcm_settings.google_application_credentials,
+          fcm_settings.firebase_project_id
+        )
       end
 
       def push!(notification)
         json     = notification.payload
-        ids      = json.delete(:registration_ids) || Array(json.delete(:to))
-        response = FCM.new(server_key).send(ids, json)
+        response = fcm.send_v1(json)
 
         if SUCCESS_CODES.include?(response[:status_code])
-          FcmResponse.new(response.slice(:body, :headers, :status_code).merge(raw_response: response))
+          FcmResponse.new(**response.slice(:body, :headers, :status_code).merge(raw_response: response))
         else
           raise "#{response[:response]} (response body: #{response[:body]})"
         end
       rescue => cause
-        resopnse = FcmResponse.new(response.slice(:body, :headers, :status_code).merge(raw_response: response)) if response
-        error    = Pushing::FcmDeliveryError.new("Error while trying to send push notification: #{cause.message}", resopnse, notification)
+        resopnse = FcmResponse.new(**response.slice(:body, :headers, :status_code).merge(raw_response: response)) if response
+        error    = Pushing::FcmDeliveryError.new("FCM: #{fcm.inspect.to_yaml}\n Error while trying to send push notification: #{cause.message}\n#{cause.backtrace}\npayload: #{notification.payload}", resopnse, notification)
 
         raise error, error.message, cause.backtrace
       end
