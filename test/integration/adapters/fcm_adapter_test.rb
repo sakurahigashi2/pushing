@@ -13,5 +13,8 @@ class FcmAdapterIntegrationTest < ActiveSupport::TestCase
   def adapter
     'fcm'
   end
-end
 
+  def stub_url
+    "https://fcm.googleapis.com/v1/projects/#{Pushing.config.fcm.firebase_project_id}/messages:send"
+  end
+end

@@ -22,8 +22,9 @@ module FcmTestCases
   def test_observer_can_observe_responses_from_fcm
     MaintainerNotifier.register_observer FcmTokenHandler.new
 
-    stub_request(:post, "https://fcm.googleapis.com/fcm/send").to_return(
+    stub_request(:post, stub_url).to_return(
       status: 200,
+      headers: {},
       body: {
         multicast_id: 216,
         success: 3,
@@ -49,7 +50,7 @@ module FcmTestCases
   end
 
   def test_notifier_raises_exception_on_http_client_error
-    stub_request(:post, "https://fcm.googleapis.com/fcm/send").to_return(status: 400)
+    stub_request(:post, stub_url).to_return(status: 400)
 
     error = assert_raises Pushing::FcmDeliveryError do
       MaintainerNotifier.build_result(adapter, fcm: true).deliver_now!
@@ -60,7 +61,7 @@ module FcmTestCases
   end
 
   def test_notifier_can_rescue_error_on_error_response
-    stub_request(:post, "https://fcm.googleapis.com/fcm/send").to_return(status: 400)
+    stub_request(:post, stub_url).to_return(status: 400)
 
     assert_nothing_raised do
       NotifierWithRescueHandler.fcm.deliver_now!
@@ -73,4 +74,9 @@ module FcmTestCases
   def adapter
     raise NotImplementedError
   end
+
+  def stub_url
+    raise NotImplementedError
+  end
+
 end

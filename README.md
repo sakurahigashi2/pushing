@@ -34,7 +34,7 @@ If you are starting from scratch, it is recommended using [anpotic](https://gith
 
 ```ruby
 gem 'apnotic' # APNs
-gem 'andpush' # FCM
+gem 'fcm' # FCM *andpush is not maintenance
 ```
 
 ### Walkthrough to Writing a Notifier
@@ -220,10 +220,12 @@ end
 ```ruby
 Pushing.configure do |config|
   # Adapter that is used to send push notifications through FCM
-  config.fcm.adapter = Rails.env.test? ? :test : :andpush
+  config.fcm.adapter = Rails.env.test? ? :test : :fcm_gem
 
-  # Your FCM servery key that can be found here: https://console.firebase.google.com/project/_/settings/cloudmessaging
-  config.fcm.server_key = 'YOUR_FCM_SERVER_KEY'
+  # Google application credentials that are used to send push notifications through FCM
+  # https://github.com/decision-labs/fcm?tab=readme-ov-file#getting-started
+  config.fcm.google_application_credentials = 'YOUR_GOOGLE_APPLICATION_CREDENTIALS_PATH'
+  config.fcm.firebase_project_id = 'YOUR_FIREBASE_PROJECT_ID'
 
   # Adapter that is used to send push notifications through APNs
   config.apn.adapter = Rails.env.test? ? :test : :apnotic
@@ -284,7 +286,7 @@ Pushing provides first-class support for testing. In order to test your notifier
 # config/initializers/pushing.rb
 Pushing.configure do |config|
   config.apn.adapter = Rails.env.test? ? :test : :apnotic
-  config.fcm.adapter = Rails.env.test? ? :test : :andpush
+  config.fcm.adapter = Rails.env.test? ? :test : :fcm_gem
 end
 ```
 
